@@ -1,20 +1,27 @@
 # Ruth Gemfile what
 module Ruth
+  # Gemfile generator
   class Gemfile
     attr_accessor :conf, :output
+
     def initialize(conf)
       @conf = conf
       @output = []
     end
 
-    # GO and make stuff
+    # Public - Generate Gemfile
+    #
+    # Returns Array
     def generate
       iterate
-      puts @output.join('\n')
+      @output
     end
 
     private
 
+    # Private  - Go trough provided keys and generate output
+    #
+    # Returns nil
     def iterate
       @conf.keys.map do |key|
         case key
@@ -23,17 +30,21 @@ module Ruth
         when :general
           general_list
         end
-
       end
     end
 
+    # Private - Fill in source list
+    #
+    # Returns nil
     def sources
       @conf[:source].each do |h|
         @output << "source '#{h}'"
       end
     end
 
-    # Private - Generate gem list
+    # Private - Generate gem list depending on type
+    #
+    # Returns nil
     def general_list
       @conf[:general].each do |g|
         if g.kind_of?(String)
@@ -44,7 +55,9 @@ module Ruth
       end
     end
 
-    # Private what
+    # Private - Generate "gem" line depending onthe provided options
+    #
+    # Returns nil
     def detailed_gem_list(hash)
       gem = []
 
@@ -74,7 +87,6 @@ module Ruth
           end
         end
       end
-
       @output << gem.join(', ')
     end
   end
