@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Antun Krasic"]
   spec.email         = ["antun@martuna.co"]
   spec.summary       = %q{Generate Gemfile from a YAML list}
-  spec.homepage      = ""
+  spec.homepage      = "https://github.com/akrasic/ruth"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0")
