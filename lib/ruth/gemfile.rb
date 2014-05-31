@@ -4,15 +4,30 @@ module Ruth
   class Gemfile
     attr_accessor :conf, :output
 
-    def initialize(conf)
-      @conf = conf
+    def initialize
       @output = []
+    end
+
+    # Public - Set @conf with filled YAML data
+    #
+    # conf  - Array YAML list
+    #
+    # Returns nil
+    def set_conf(conf)
+      @conf = conf
     end
 
     # Public - Generate Gemfile
     #
     # Returns Array
-    def generate
+    def generate(conf = nil)
+
+      if @conf.nil?
+        fail "Please use set_conf() method or provide conf for generate()"
+      else
+        @conf = conf
+      end
+
       iterate
       @output
     end
