@@ -2,34 +2,20 @@
 module Ruth
   # Gemfile generator
   class Gemfile
-    attr_accessor :conf, :output
+    attr_accessor :file, :data, :gem
 
-    def initialize
-      @output = []
-    end
-
-    # Public - Set @conf with filled YAML data
-    #
-    # conf  - Array YAML list
-    #
-    # Returns nil
-    def set_conf(conf)
-      @conf = conf
+    def initialize(file)
+      @gem = []
+      @file = file
+      @data = parse_yaml_file
     end
 
     # Public - Generate Gemfile
     #
     # Returns Array
-    def generate(conf = nil)
-
-      if @conf.nil?
-        fail "Please use set_conf() method or provide conf for generate()"
-      else
-        @conf = conf
-      end
-
-      iterate
-      @output
+    def generate
+      parse_gemfile_items
+      @gem.join(', ')
     end
 
     private
@@ -37,8 +23,8 @@ module Ruth
     # Private  - Go trough provided keys and generate output
     #
     # Returns nil
-    def iterate
-      @conf.keys.map do |key|
+    def parse_gemfile_items
+      @data.keys.map do |key|
         case key
         when :source
           sources
@@ -52,7 +38,7 @@ module Ruth
     #
     # Returns nil
     def sources
-      @conf[:source].each do |h|
+      @data[:source].each do |h|
         @output << "source '#{h}'"
       end
     end
@@ -61,7 +47,7 @@ module Ruth
     #
     # Returns nil
     def general_list
-      @conf[:general].each do |g|
+      @data[:general].each do |g|
         if g.kind_of?(String)
           @output << "gem '#{g}'"
         elsif g.kind_of?(Hash)
@@ -74,35 +60,56 @@ module Ruth
     #
     # Returns nil
     def detailed_gem_list(hash)
-      gem = []
-
       hash.keys.map do |key|
         case key
         when :name
-          gem << "gem '#{hash[:name]}'"
+          @gem << "gem '#{hash[key]}'"
         when :git
-          gem << ":git => '#{hash[:git]}'"
+          @gem << ":git => '#{hash[key]}'"
         when :branch
-          gem << ":branch => '#{hash[:branch]}'"
+          @gem << ":branch => '#{hash[key]}'"
         when :version
-          case hash[:version]
-          when />=/, /~>/, /</
-            gem << hash[:version]
-          else
-            fail "Please provide correct version: ~> #{hash[:version]} / >= \
-  #{hash[:version]}"
-          end
+          @gem << verify_version
         when :require
-          gem << ":require => #{hash[:require]}"
+          @gem << ":require => #{hash[key]}"
         when :group
-          if hash[:group].kind_of?(String)
-            gem << ":group => #{hash[:group]}"
-          elsif hash[:group].kind_of?(Array)
-            gem << ":group => [#{hash[:group].join(', ')}]"
-          end
+          gem_group
         end
       end
-      @output << gem.join(', ')
+    end
+
+    # Private - Check kind of group we hav
+    #
+    # group - Array or String of groups where gem belongs
+    #
+    # Returns String
+    def gem_group(group)
+      if group.kind_of?(String)
+        @gem << ":group => #{group}"
+      elsif group.kind_of?(Array)
+        @gem << ":group => [#{group.join(', ')}]"
+      end
+    end
+
+    # Private - Check if version key data syntax is correct
+    #
+    # version - String
+    #
+    # Returns String
+    def verify_version(version)
+      ver = [/>=/, /~>/, /</].any? { |w| w =~ version }
+      if ver
+        gem << version
+      else
+        fail "Please provide correct version: ~> #{hash[:version]} / >= \
+#{hash[:version]}"
+      end
+    end
+    # Private - Read YAML file
+    #
+    # Return Hash
+    def parse_yaml_file
+      YAML.load_file(@file)
     end
   end
 end
