@@ -2,11 +2,11 @@
 module Ruth
   # Gemfile generator
   class Gemfile
-    attr_accessor :file, :data, :gem
+    attr_accessor :file, :data, :gem, :gemfile
 
-    def initialize(file)
+    def initialize(yaml_file)
       @gem = []
-      @file = file
+      @file = yaml_file
       @data = parse_yaml_file
     end
 
@@ -16,6 +16,23 @@ module Ruth
     def generate
       parse_gemfile_items
       @gem.join(', ')
+    end
+
+    # Public - Write parsed data into a Gemfile
+    #
+    # file - String location fo the file
+    #
+    # Returns nil
+    def write_gemfile
+      begin
+        fd = File.open(@gemfile, 'w')
+
+        @gem.each do |d|
+          df.write(d)
+        end
+      ensure
+        fd.close unless fd.nil?
+      end
     end
 
     private
@@ -111,5 +128,6 @@ module Ruth
     def parse_yaml_file
       YAML.load_file(@file)
     end
+
   end
 end
