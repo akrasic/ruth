@@ -68,7 +68,7 @@ module Ruth
     def general_list
       @data[:general].each do |g|
         if g.kind_of?(String)
-          @output << "gem '#{g}'"
+          @gem<< "gem '#{g}'"
         elsif g.kind_of?(Hash)
           detailed_gem_list(g)
         end
