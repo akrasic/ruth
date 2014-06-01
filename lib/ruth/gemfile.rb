@@ -79,22 +79,24 @@ module Ruth
     #
     # Returns nil
     def detailed_gem_list(hash)
+      items = []
       hash.keys.map do |key|
         case key
         when :name
-          @gem << "gem '#{hash[key]}'"
+          items << "gem '#{hash[key]}'"
         when :git
-          @gem << ":git => '#{hash[key]}'"
+          items << ":git => '#{hash[key]}'"
         when :branch
-          @gem << ":branch => '#{hash[key]}'"
+          items << ":branch => '#{hash[key]}'"
         when :version
-          @gem << verify_version
+          items << verify_version
         when :require
-          @gem << ":require => #{hash[key]}"
+          items << ":require => #{hash[key]}"
         when :group
-          gem_group
+          items << gem_group
         end
       end
+      @gem << items.join(', ')
     end
 
     # Private - Check kind of group we hav
@@ -104,9 +106,9 @@ module Ruth
     # Returns String
     def gem_group(group)
       if group.kind_of?(String)
-        @gem << ":group => #{group}"
+        ":group => #{group}"
       elsif group.kind_of?(Array)
-        @gem << ":group => [#{group.join(', ')}]"
+        ":group => [#{group.join(', ')}]"
       end
     end
 
