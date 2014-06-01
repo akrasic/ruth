@@ -16,7 +16,7 @@ module Ruth
     #
     # Returns Array
     def final_gemfile
-      @gem.join(', ')
+      @gem.join("\n")
     end
 
     # Public - Write parsed data into a Gemfile
