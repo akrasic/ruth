@@ -53,8 +53,12 @@ module Ruth
     #
     # Returns nil
     def sources
-      @data[:source].each do |h|
-        @output << "source '#{h}'"
+      if @data[:source].kind_of?(String)
+        @gem << "source '#{@data[:source]}"
+      elsif @data[:source].kind_of?(Array)
+        @data[:source].each do |h|
+          @gem<< "source '#{h}'"
+        end
       end
     end
 
