@@ -8,13 +8,14 @@ module Ruth
       @gem = []
       @file = yaml_file
       @data = parse_yaml_file
+
+      parse_gemfile_items
     end
 
     # Public - Generate Gemfile
     #
     # Returns Array
-    def generate
-      parse_gemfile_items
+    def final_gemfile
       @gem.join(', ')
     end
 
@@ -26,10 +27,7 @@ module Ruth
     def write_gemfile
       begin
         fd = File.open(@gemfile, 'w')
-
-        @gem.each do |d|
-          df.write(d)
-        end
+        fd.write(final_gemfile)
       ensure
         fd.close unless fd.nil?
       end
