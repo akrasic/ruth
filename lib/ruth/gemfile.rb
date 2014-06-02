@@ -25,12 +25,9 @@ module Ruth
     #
     # Returns nil
     def write_gemfile
-      begin
-        fd = File.open(@gemfile, 'w')
-        fd.write(final_gemfile)
-      ensure
-        fd.close unless fd.nil?
-      end
+      fd = File.open(@gemfile, 'w')
+      fd.write(final_gemfile)
+      fd.close unless fd.nil?
     end
 
     private
