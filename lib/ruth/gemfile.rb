@@ -120,7 +120,7 @@ module Ruth
     def verify_version(version)
       ver = [/>=/, /~>/, /</].any? { |w| w =~ version }
       if ver
-        gem << version
+        version
       else
         fail "Please provide correct version: ~> #{hash[:version]} / >= \
 #{hash[:version]}"
