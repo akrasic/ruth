@@ -57,7 +57,7 @@ module Ruth
         @gem << "source '#{@data[:source]}"
       elsif @data[:source].kind_of?(Array)
         @data[:source].each do |h|
-          @gem<< "source '#{h}'"
+          @gem << "source '#{h}'"
         end
       end
     end
@@ -66,37 +66,80 @@ module Ruth
     #
     # Returns nil
     def general_list
-      @data[:general].each do |g|
-        if g.kind_of?(String)
-          @gem<< "gem '#{g}'"
-        elsif g.kind_of?(Hash)
-          detailed_gem_list(g)
-        end
+      @data[:general].each { |g| gem_list(g) }
+    end
+
+    # Private - Generate gem group
+    #
+    # Returns nil
+    def group_list
+      @data[:group].each do |gr|
+        @gem << gem_group(gr[:group_name])
+
+        gr[:gems].each { |g| gem_list(g, 1) }
+
+        @gem << 'end'
+      end
+    end
+
+    # Private - Create gem listing from a provided Array or Hash
+    #
+    # gems - Array or Hash gem list
+    #
+    # Returns nil
+    def gem_list(gems, format = nil)
+      if gems.kind_of?(String)
+        @gem << format_gem_item(gems, format)
+      elsif gems.kind_of?(Hash)
+        @gem << detailed_gem_list(gems, format)
       end
     end
 
     # Private - Generate "gem" line depending onthe provided options
     #
-    # Returns nil
-    def detailed_gem_list(hash)
+    # hash - Hash Gem definition
+    # format - true/false states if tabbed formatting should be added
+    #
+    # Returns Array
+    def detailed_gem_list(hash, format)
       items = []
       hash.keys.map do |key|
         case key
         when :name
-          items << "gem '#{hash[key]}'"
-        when :git
-          items << ":git => '#{hash[key]}'"
-        when :branch
-          items << ":branch => '#{hash[key]}'"
+          items << format_gem_item(hash[key], format)
         when :version
           items << verify_version
-        when :require
-          items << ":require => #{hash[key]}"
         when :group
           items << gem_group
+        else
+          items << format_gem_item(key, hash[key])
         end
       end
       @gem << items.join(', ')
+    end
+
+    # Private - Outputs gem line formatted or not
+    #
+    # gem - String gem line
+    # formatting - true/false
+    #
+    # Returns String
+    def format_gem_item(gem, format)
+      if format
+        "\tgem '#{gem}'"
+      else
+        "gem '#{gem}'"
+      end
+    end
+
+    # Private - Return String for Gem line of additional options
+    #
+    # item - String name of the definition
+    # value - String value to assing
+    #
+    # Return String
+    def gem_line_item(item, value)
+      "#{item} => '#{value}'"
     end
 
     # Private - Check kind of group we hav
@@ -126,12 +169,12 @@ module Ruth
 #{hash[:version]}"
       end
     end
+
     # Private - Read YAML file
     #
     # Return Hash
     def parse_yaml_file
       YAML.load_file(@file)
     end
-
   end
 end
