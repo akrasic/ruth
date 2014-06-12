@@ -3,7 +3,7 @@ module Ruth
   # Gemfile generator
   class Gemfile
     # YAML suppoer for Ruth
-    class YAML < Ruth::Gemfile::Hash
+    class Yaml < Ruth::Gemfile::Hash
       attr_accessor :yaml
 
       def initialize(yaml)
