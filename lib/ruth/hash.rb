@@ -126,9 +126,9 @@ module Ruth
       # Returns String
       def gem_group(group)
         if group.kind_of?(String)
-          ":group => #{group}"
+          "group :#{group} do"
         elsif group.kind_of?(Array)
-          ":group => [#{group.join(', ')}]"
+          ":group [#{group.join(', ')}]"
         end
       end
 
