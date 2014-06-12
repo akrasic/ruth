@@ -2,19 +2,13 @@
 module Ruth
   # Gemfile generator
   class Gemfile
+    # Hash parser
     class Hash
-      attr_accessor :file, :data, :gem, :gemfile
+      attr_accessor :file, :gem, :gemfile
+      attr_writer :data
 
       def initialize
         @gem = []
-        #parse_gemfile_items
-      end
-
-      # Public - Set the Hash Gemfile definition
-      #
-      # Return Hahs
-      def set_hash(hash)
-        @data = hash
       end
 
       # Public - Generate Gemfile contents
@@ -25,17 +19,6 @@ module Ruth
         @gem.join("\n")
       end
 
-      # Public - Write parsed data into a Gemfile
-      #
-      # file - String location fo the file
-      #
-      # Returns nil
-      def write_gemfile
-        fd = File.open(@gemfile, 'w')
-        fd.write(final_gemfile)
-        fd.close unless fd.nil?
-      end
-
       private
 
       # Private  - Go trough provided keys and generate output
@@ -44,10 +27,9 @@ module Ruth
       def parse_gemfile_item
         @data.keys.map do |key|
           case key
-          when :source
-            sources
-          when :general
-            general_list
+          when :source then sources
+          when :general then general_list
+          when :group then group_list
           end
         end
       end
@@ -56,12 +38,9 @@ module Ruth
       #
       # Returns nil
       def sources
-        if @data[:source].kind_of?(String)
-          @gem << "source '#{@data[:source]}"
-        elsif @data[:source].kind_of?(Array)
-          @data[:source].each do |h|
-            @gem << "source '#{h}'"
-          end
+        case @data[:source]
+        when String then gem << "source '#{@data[:source]}"
+        when Array then @data[:source].each { |h| @gem << "source '#{h}'" }
         end
       end
 
@@ -76,26 +55,25 @@ module Ruth
       #
       # Returns nil
       def group_list
-        @data[:group].each do |gr|
-          @gem << gem_group(gr[:group_name])
-
-          gr[:gems].each { |g| gem_list(g, 1) }
-
+        @data[:group].each do |group|
+          @gem << gem_group(group[:group_name])
+          group[:gems].each { |item| gem_list(item, true) }
           @gem << 'end'
         end
       end
 
       # Private - Create gem listing from a provided Array or Hash
       #
-      # gems - Array or Hash gem list
+      # item - Array or Hash gem list
+      # tab - nil/true add tab indentation
       #
       # Returns nil
-      def gem_list(gems, format = nil)
-        if gems.kind_of?(String)
-          @gem << format_gem_item(gems, format)
-        elsif gems.kind_of?(Hash)
-          @gem << detailed_gem_list(gems, format)
-        end
+      def gem_list(item, tab = nil)
+        item.key?(:name)
+      rescue NoMethodError
+        @gem << format_gem_item(item, tab)
+      else
+        @gem << detailed_gem_list(item, tab)
       end
 
       # Private - Generate "gem" line depending onthe provided options
@@ -108,17 +86,13 @@ module Ruth
         items = []
         hash.keys.map do |key|
           case key
-          when :name
-            items << format_gem_item(hash[key], format)
-          when :version
-            items << verify_version
-          when :group
-            items << gem_group
-          else
-            items << format_gem_item(key, hash[key])
+          when :name then items << format_gem_item(hash[key], format)
+          when :version then items << verify_version(hash[key])
+          when :group then items << gem_group
+          else items << gem_inline_item(key, hash[key])
           end
         end
-        @gem << items.join(', ')
+        items.join(', ')
       end
 
       # Private - Outputs gem line formatted or not
@@ -141,8 +115,8 @@ module Ruth
       # value - String value to assing
       #
       # Return String
-      def gem_line_item(item, value)
-        "#{item} => '#{value}'"
+      def gem_inline_item(item, value)
+        ":#{item} => '#{value}'"
       end
 
       # Private - Check kind of group we hav
@@ -166,13 +140,12 @@ module Ruth
       def verify_version(version)
         ver = [/>=/, /~>/, /</].any? { |w| w =~ version }
         if ver
-          version
+          "'#{version}'"
         else
           fail "Please provide correct version: ~> #{hash[:version]} / >= \
   #{hash[:version]}"
         end
       end
-
     end
   end
 end
