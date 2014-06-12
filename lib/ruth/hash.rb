@@ -41,7 +41,7 @@ module Ruth
       # Private  - Go trough provided keys and generate output
       #
       # Returns nil
-      def parse_gemfile_items
+      def parse_gemfile_item
         @data.keys.map do |key|
           case key
           when :source

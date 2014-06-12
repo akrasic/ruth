@@ -1,3 +1,5 @@
 require 'yaml'
-require 'ruth/gemfile'
+require 'ruth/hash'
+require 'ruth/yaml'
+require 'ruth/json'
 require 'ruth/version'
