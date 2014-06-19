@@ -103,7 +103,7 @@ module Ruth
       # Returns String
       def format_gem_item(gem, format)
         if format
-          "\tgem '#{gem}'"
+          "  gem '#{gem}'"
         else
           "gem '#{gem}'"
         end
