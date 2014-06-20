@@ -42,6 +42,7 @@ module Ruth
         when String then gem << "source '#{@data[:source]}"
         when Array then @data[:source].each { |h| @gem << "source '#{h}'" }
         end
+        @gem << ''
       end
 
       # Private - Generate gem list depending on type
@@ -58,7 +59,7 @@ module Ruth
         @data[:group].each do |group|
           @gem << gem_group(group[:group_name])
           group[:gems].each { |item| gem_list(item, true) }
-          @gem << 'end'
+          @gem << "end\n"
         end
       end
 
